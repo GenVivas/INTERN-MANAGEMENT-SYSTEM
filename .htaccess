@@ -1,0 +1,15 @@
+Options -Indexes
+
+# Protect sensitive file types
+<FilesMatch "\.(sql|log|env|md)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Block direct access to config/includes/modules/db directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block sensitive directories
+    RewriteRule ^(config|includes|modules|db)/ - [F,L]
+</IfModule>
