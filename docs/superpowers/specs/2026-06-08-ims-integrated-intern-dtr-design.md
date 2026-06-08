@@ -80,6 +80,7 @@ This public, standalone web page handles camera capture. Optimized for mobile vi
 - **Guided Capture Interface**:
   - Circular webcam preview wrapper with dynamic glowing scanning ring.
   - Step indicator dots showing progress across 5 capture angles.
+  - **3D CSS Face Guide**: An interactive, animated CSS face mask that rotates or scales in 3D (using CSS transitions) to match the required angle for the current step, helping the user understand which way to position their head.
   - Clear user alerts and success/error status cards.
 
 ### 4.3 Page Workflow
