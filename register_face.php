@@ -566,6 +566,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 <div class="container">
     <div class="header">
+        <img src="/uploads/photos/logo-dark.png" alt="TDT Powersteel Logo" style="height: 48px; margin-bottom: 12px; object-fit: contain;">
         <h1>TDT Powersteel</h1>
         <p>Intern Face Registration</p>
     </div>
@@ -575,7 +576,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <div class="status-card">
             <div class="status-icon danger"><i class="fas fa-times-circle"></i></div>
             <div class="status-title">Link Expired or Invalid</div>
-            <div class="status-text">This registration link is invalid or has expired. Face registration links expire 72 hours after generation. Please contact HR to get a new link.</div>
+            <div class="status-text">This registration link is invalid or has expired. Face registration links expire 24 hours after generation. Please contact HR to get a new link.</div>
         </div>
     <?php else: ?>
         <!-- Main Form & Capture Section -->
@@ -591,10 +592,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             </div>
 
             <!-- Email confirmation -->
-            <div class="form-group" id="emailSection">
-                <label class="form-label">Email Address</label>
-                <input type="email" id="internEmail" class="form-control" placeholder="Enter your email" value="<?= htmlspecialchars($intern['email'] ?? '') ?>" required>
-                <button type="button" class="btn btn-primary" style="margin-top: 10px;" id="startCaptureBtn">Proceed to Camera</button>
+            <div id="emailSection" style="display: flex; flex-direction: column; gap: 20px;">
+                <div class="form-group">
+                    <label class="form-label" style="display: flex; align-items: center; gap: 6px;">
+                        Email Address <span style="color: var(--danger); font-size: 14px;">*</span>
+                    </label>
+                    <input type="email" id="internEmail" class="form-control" placeholder="Enter your active email address" value="<?= htmlspecialchars($intern['email'] ?? '') ?>" required>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">Your QR code for attendance logging will be sent to this email after face registration.</p>
+                </div>
+                
+                <button type="button" class="btn btn-primary" id="startCaptureBtn">
+                    Proceed to Camera <i class="fas fa-arrow-right" style="margin-left: 4px;"></i>
+                </button>
             </div>
 
             <!-- Camera section -->
