@@ -329,7 +329,7 @@ function copyLink(link) {
 function generateLink(id, name) {
     Swal.fire({
         title: 'Generate Link',
-        text: 'Generate a new 72-hour face registration link for ' + name + '?',
+        text: 'Generate a new 24-hour face registration link for ' + name + '?',
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#FF6B1A',
