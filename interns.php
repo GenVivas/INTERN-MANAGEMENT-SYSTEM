@@ -164,17 +164,17 @@ require_once __DIR__ . '/includes/header.php';
         <span class="card-title"><?= count($interns) ?> Intern<?= count($interns)!=1?'s':'' ?> found</span>
     </div>
     <div class="card-body" style="padding:0">
-        <div class="table-wrapper">
+        <div class="table-wrapper" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
             <table class="ims-table">                <thead>
                     <tr>
-                        <th>Intern</th>
-                        <th>Department</th>
-                        <th>School</th>
-                        <th>Status</th>
-                        <th>Face ID</th>
-                        <th>Progress</th>
-                        <th>Hours</th>
-                        <th style="width:140px">Action</th>
+                        <th style="text-align: left;">Intern</th>
+                        <th style="text-align: left;">Department</th>
+                        <th style="text-align: left;">School</th>
+                        <th style="text-align: center;">Status</th>
+                        <th style="text-align: center;">Face ID</th>
+                        <th style="text-align: left;">Progress</th>
+                        <th style="text-align: right;">Hours</th>
+                        <th style="text-align: center; width:140px">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -186,7 +186,7 @@ require_once __DIR__ . '/includes/header.php';
                     $isTokenActive = $intern['registration_token'] && strtotime($intern['token_expires_at']) > time();
                 ?>
                 <tr style="cursor:pointer" onclick="location.href='/intern_workspace.php?id=<?= $intern['id'] ?>'">
-                    <td>
+                    <td style="text-align: left;">
                         <div class="d-flex align-center gap-8">
                             <div class="intern-avatar" style="width:36px;height:36px;font-size:14px;flex-shrink:0">
                                 <?php if ($intern['profile_photo']): ?>
@@ -199,10 +199,10 @@ require_once __DIR__ . '/includes/header.php';
                             </div>
                         </div>
                     </td>
-                    <td><?= htmlspecialchars($intern['dept_name']) ?></td>
-                    <td class="text-muted"><?= htmlspecialchars($intern['school'] ?: '—') ?></td>
-                    <td><span class="badge badge-<?= strtolower($intern['status']) ?>"><?= $intern['status'] ?></span></td>
-                    <td>
+                    <td style="text-align: left;"><?= htmlspecialchars($intern['dept_name']) ?></td>
+                    <td class="text-muted" style="text-align: left;"><?= htmlspecialchars($intern['school'] ?: '—') ?></td>
+                    <td style="text-align: center;"><span class="badge badge-<?= strtolower($intern['status']) ?>"><?= $intern['status'] ?></span></td>
+                    <td style="text-align: center;">
                         <?php if ($intern['face_embedding']): ?>
                             <span class="badge badge-active"><i class="fas fa-check-circle"></i> Registered</span>
                         <?php elseif ($isTokenActive): ?>
@@ -211,15 +211,15 @@ require_once __DIR__ . '/includes/header.php';
                             <span class="badge badge-archived"><i class="fas fa-times-circle"></i> Pending Face ID</span>
                         <?php endif; ?>
                     </td>
-                    <td style="min-width:100px">
+                    <td style="min-width:100px; text-align: left;">
                         <div class="progress-bar-wrap">
                             <div class="progress-bar-fill" style="width:<?= $pct ?>%"></div>
                         </div>
                         <span class="fs-12 text-muted"><?= $pct ?>%</span>
                     </td>
-                    <td class="fs-12"><?= number_format($intern['rendered_hours'],1) ?> / <?= number_format($intern['required_hours'],0) ?></td>
-                    <td onclick="event.stopPropagation()">
-                        <div class="d-flex gap-4">
+                    <td class="fs-12" style="text-align: right;"><?= number_format($intern['rendered_hours'],1) ?> / <?= number_format($intern['required_hours'],0) ?></td>
+                    <td onclick="event.stopPropagation()" style="text-align: center;">
+                        <div class="d-flex gap-8" style="justify-content: center;">
                             <a href="/intern_workspace.php?id=<?= $intern['id'] ?>" class="btn btn-icon btn-sm" title="Open Workspace">
                                 <i class="fas fa-arrow-right" style="color:var(--orange)"></i>
                             </a>
