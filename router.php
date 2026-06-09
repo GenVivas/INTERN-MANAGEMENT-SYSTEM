@@ -7,7 +7,7 @@ if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|woff2?|ttf|svg|ico)$/', $_SERVER["
 $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
 
 if ($path === '/register') {
-    require __DIR__ . '/register_face.php';
+    require __DIR__ . '/register_intern.php';
     return true;
 }
 

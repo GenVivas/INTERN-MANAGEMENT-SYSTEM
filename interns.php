@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $token = bin2hex(random_bytes(16));
                 $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
-                $stmt = $db->prepare("UPDATE interns SET registration_token = ?, token_expires_at = ? WHERE id = ?");
+                $stmt = $db->prepare("UPDATE interns SET registration_token = ?, token_expires_at = ?, email = NULL WHERE id = ?");
                 $stmt->bind_param('ssi', $token, $expiresAt, $internId);
                 $stmt->execute();
                 $stmt->close();
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'success' => true,
                     'token' => $token,
                     'expires_at' => $expiresAt,
-                    'url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register_face.php?token=' . $token
+                    'url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register_intern.php?token=' . $token
                 ]);
                 exit;
             } elseif ($action === 're_register') {
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $token = bin2hex(random_bytes(16));
                 $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
-                $stmt = $db->prepare("UPDATE interns SET face_embedding = NULL, face_registered_at = NULL, registration_token = ?, token_expires_at = ? WHERE id = ?");
+                $stmt = $db->prepare("UPDATE interns SET face_embedding = NULL, face_registered_at = NULL, registration_token = ?, token_expires_at = ?, email = NULL WHERE id = ?");
                 $stmt->bind_param('ssi', $token, $expiresAt, $internId);
                 $stmt->execute();
                 $stmt->close();
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'success' => true,
                     'token' => $token,
                     'expires_at' => $expiresAt,
-                    'url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register_face.php?token=' . $token
+                    'url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register_intern.php?token=' . $token
                 ]);
                 exit;
             }
@@ -232,7 +232,7 @@ require_once __DIR__ . '/includes/header.php';
                                 </button>
                             <?php else: ?>
                                 <?php if ($isTokenActive): ?>
-                                    <button class="btn btn-icon btn-sm" title="Copy Registration Link" onclick="copyLink('<?= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register_face.php?token=' . $intern['registration_token'] ?>', '<?= htmlspecialchars($intern['first_name'], ENT_QUOTES) ?>')">
+                                    <button class="btn btn-icon btn-sm" title="Copy Registration Link" onclick="copyLink('<?= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register_intern.php?token=' . $intern['registration_token'] ?>', '<?= htmlspecialchars($intern['first_name'], ENT_QUOTES) ?>')">
                                         <i class="fas fa-copy" style="color: #3B82F6;"></i>
                                     </button>
                                     <button class="btn btn-icon btn-sm" title="Re-generate Link" onclick="generateLink(<?= $intern['id'] ?>, '<?= htmlspecialchars($intern['first_name'].' '.$intern['last_name'], ENT_QUOTES) ?>', true)">
