@@ -320,7 +320,7 @@ function printQR() {
 
 function copyLink(link, name) {
     name = name || 'there';
-    const text = `Hello ${name}! Here is your Face ID registration link for the TDT Powersteel Intern Management System:\n\n${link}\n\nNote: This link is secure and will expire in 24 hours. Please open it on your smartphone to complete the registration. Thank you!`;
+    const text = `Hello ${name}!\n\nTDT Powersteel is setting up a new touchless Kiosk at the office for daily time and attendance (DTR) tracking. To register your face profile and generate your personal attendance QR code, please open this secure link on your smartphone:\n\n${link}\n\nNote: This link will expire in 24 hours. Once registered, your QR code will be displayed on-screen and emailed to you. Thank you!`;
     navigator.clipboard.writeText(text).then(function() {
         showToast('Registration message copied!', 'success');
     }).catch(function(err) {

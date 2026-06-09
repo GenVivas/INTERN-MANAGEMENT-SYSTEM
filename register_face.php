@@ -39,14 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     // Call Python ONNX Face Service to get embeddings
     // Python service is expected to run on localhost:5001
     $pythonServiceUrl = 'http://localhost:5001/embed';
-    
+
     $ch = curl_init($pythonServiceUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['images' => $images]));
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-    
+
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $curlError = curl_error($ch);
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 mkdir($uploadDir, 0755, true);
             }
             $profilePhotoName = $intern['id'] . '_' . time() . '.jpg';
-            
+
             // Delete old photo if it exists
             $oldRes = $db->query("SELECT profile_photo FROM interns WHERE id = " . $intern['id']);
             if ($oldRes && $oldRow = $oldRes->fetch_assoc()) {
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     @unlink($uploadDir . $oldPhoto);
                 }
             }
-            
+
             file_put_contents($uploadDir . $profilePhotoName, $imgData);
         }
     }
@@ -121,11 +121,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if ($success) {
         logAudit('REGISTER_FACE', 'Interns', $intern['id'], "Registered face ID for {$intern['first_name']} {$intern['last_name']}.");
-        
+
         // Send QR Code Email
         $subject = "Your TDT Powersteel Intern QR Code";
         $qrImageUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($qrCode);
-        
+
         $message = "
         <html>
         <head>
@@ -151,11 +151,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         </body>
         </html>
         ";
-        
+
         $headers = "MIME-Version: 1.0" . "\r\n";
         $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
         $headers .= "From: no-reply@tdtpowersteel.com" . "\r\n";
-        
+
         // Suppress mail errors, fallback to on-screen download
         @mail($email, $subject, $message, $headers);
 
@@ -168,6 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -177,21 +178,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     <!-- MediaPipe Face Landmarker loaded dynamically in script -->
     <style>
         :root {
-            --orange:       #FF6B1A;
-            --orange-dark:  #E8521A;
+            --orange: #FF6B1A;
+            --orange-dark: #E8521A;
             --orange-light: #FFF0E8;
-            --white:        #FFFFFF;
-            --gray-light:   #F4F5F7;
-            --gray-border:  #E2E4E8;
-            --text-main:    #1A1A2E;
-            --text-muted:   #6B7280;
-            --success:      #22C55E;
-            --danger:       #EF4444;
-            --radius:       16px;
+            --white: #FFFFFF;
+            --gray-light: #F4F5F7;
+            --gray-border: #E2E4E8;
+            --text-main: #1A1A2E;
+            --text-muted: #6B7280;
+            --success: #22C55E;
+            --danger: #EF4444;
+            --radius: 16px;
         }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: var(--gray-light);
@@ -208,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             max-width: 440px;
             background: var(--white);
             border-radius: var(--radius);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
             border: 1px solid var(--gray-border);
             overflow: hidden;
             display: flex;
@@ -313,7 +318,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             overflow: hidden;
             background: #000;
             border: 4px solid var(--gray-border);
-            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         }
 
         .camera-box.active {
@@ -325,7 +330,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1); /* mirror effect */
+            transform: scaleX(-1);
+            /* mirror effect */
         }
 
         .scanning-ring {
@@ -341,8 +347,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .camera-overlay {
@@ -436,8 +447,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             margin-bottom: 8px;
         }
 
-        .status-icon.danger { color: var(--danger); }
-        .status-icon.success { color: var(--success); }
+        .status-icon.danger {
+            color: var(--danger);
+        }
+
+        .status-icon.success {
+            color: var(--success);
+        }
 
         .status-title {
             font-size: 18px;
@@ -487,10 +503,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             color: var(--white);
             transition: opacity 0.4s ease, visibility 0.4s ease;
         }
+
         .model-loading-overlay.fade-out {
             opacity: 0;
             visibility: hidden;
         }
+
         .loader-spinner {
             width: 48px;
             height: 48px;
@@ -499,6 +517,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
+
         /* Camera flash overlay */
         .camera-flash {
             position: absolute;
@@ -508,13 +527,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             pointer-events: none;
             z-index: 10;
         }
+
         .camera-flash.flash-active {
             animation: flash-anim 0.15s ease-out;
         }
+
         @keyframes flash-anim {
-            0% { opacity: 1; }
-            100% { opacity: 0; }
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
         }
+
         /* SVG Guide overlay elements */
         .svg-guide-overlay {
             position: absolute;
@@ -524,24 +551,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             pointer-events: none;
             z-index: 5;
         }
+
         .guide-circle {
             fill: none;
-            stroke: rgba(255,255,255,0.4);
+            stroke: rgba(255, 255, 255, 0.4);
             stroke-width: 3;
             stroke-dasharray: 6 6;
             transition: stroke 0.3s, stroke-dasharray 0.3s;
         }
+
         .guide-circle.aligned {
             stroke: var(--orange);
             stroke-dasharray: none;
         }
+
         .guide-circle.captured {
             stroke: var(--success);
             stroke-dasharray: none;
         }
+
         .guide-circle.error-state {
             stroke: var(--danger);
         }
+
         /* Manual override button */
         .btn-override {
             background: var(--orange-light);
@@ -552,512 +584,613 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             margin-top: 10px;
         }
 
-        .hidden { display: none !important; }
+        .hidden {
+            display: none !important;
+        }
+
+        /* Email float animation */
+        @keyframes floatMail {
+            0% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-6px) rotate(-3deg);
+            }
+
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+        }
+
+        .animated-envelope {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 54px;
+            color: var(--orange);
+            animation: floatMail 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        /* Kiosk tutorial container */
+        .kiosk-tutorial {
+            background: var(--gray-light);
+            border: 1px solid var(--gray-border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+            text-align: left;
+        }
+
+        .kiosk-tutorial h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .kiosk-tutorial ol {
+            padding-left: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .kiosk-tutorial li {
+            margin-bottom: 8px;
+        }
+
+        .kiosk-tutorial li strong {
+            color: var(--orange);
+        }
     </style>
 </head>
+
 <body>
 
-<!-- Early loading screen overlay -->
-<div id="modelLoadingOverlay" class="model-loading-overlay">
-    <div class="loader-spinner"></div>
-    <div style="font-weight: 600; font-size: 15px;">Initializing Face Camera...</div>
-    <div style="font-size: 12px; color: rgba(255, 255, 255, 0.65);">Downloading neural network model files (~6.6MB)</div>
-</div>
-
-<div class="container">
-    <div class="header">
-        <img src="/uploads/photos/logo-dark.png" alt="TDT Powersteel Logo" style="height: 48px; margin-bottom: 12px; object-fit: contain;">
-        <h1>TDT Powersteel</h1>
-        <p>Intern Face Registration</p>
+    <!-- Early loading screen overlay -->
+    <div id="modelLoadingOverlay" class="model-loading-overlay">
+        <div class="loader-spinner"></div>
+        <div style="font-weight: 600; font-size: 15px;">Initializing Face Camera...</div>
+        <div style="font-size: 12px; color: rgba(255, 255, 255, 0.65);">Downloading neural network model files (~6.6MB)
+        </div>
     </div>
 
-    <?php if (!$intern): ?>
-        <!-- Token Expired / Invalid Page -->
-        <div class="status-card">
-            <div class="status-icon danger"><i class="fas fa-times-circle"></i></div>
-            <div class="status-title">Link Expired or Invalid</div>
-            <div class="status-text">This registration link is invalid or has expired. Face registration links expire 24 hours after generation. Please contact HR to get a new link.</div>
+    <div class="container">
+        <div class="header">
+            <img src="/uploads/photos/logo-dark.png" alt="TDT Powersteel Logo"
+                style="height: 48px; margin-bottom: 12px; object-fit: contain;">
+            <h1>TDT Powersteel</h1>
+            <p>Intern Face Registration</p>
         </div>
-    <?php else: ?>
-        <!-- Main Form & Capture Section -->
-        <div id="registrationFlow" class="content">
-            <div class="profile-summary">
-                <div class="profile-avatar">
-                    <?= strtoupper(substr($intern['first_name'], 0, 1) . substr($intern['last_name'], 0, 1)) ?>
+
+        <?php if (!$intern): ?>
+            <!-- Token Expired / Invalid Page -->
+            <div class="status-card">
+                <div class="status-icon danger"><i class="fas fa-times-circle"></i></div>
+                <div class="status-title">Link Expired or Invalid</div>
+                <div class="status-text">This registration link is invalid or has expired. Face registration links expire 24
+                    hours after generation. Please contact HR to get a new link.</div>
+            </div>
+        <?php else: ?>
+            <!-- Main Form & Capture Section -->
+            <div id="registrationFlow" class="content">
+                <div class="profile-summary">
+                    <div class="profile-avatar">
+                        <?= strtoupper(substr($intern['first_name'], 0, 1) . substr($intern['last_name'], 0, 1)) ?>
+                    </div>
+                    <div class="profile-details">
+                        <h3><?= htmlspecialchars($intern['first_name'] . ' ' . $intern['last_name']) ?></h3>
+                        <p>Confirm profile details and register your face.</p>
+                    </div>
                 </div>
-                <div class="profile-details">
-                    <h3><?= htmlspecialchars($intern['first_name'] . ' ' . $intern['last_name']) ?></h3>
-                    <p>Confirm profile details and register your face.</p>
+
+                <!-- Email confirmation -->
+                <div id="emailSection" style="display: flex; flex-direction: column; gap: 20px;">
+                    <div
+                        style="font-size: 13px; line-height: 1.5; color: var(--text-muted); background: var(--gray-light); padding: 12px 14px; border-radius: 10px; border-left: 3px solid var(--orange);">
+                        TDT Powersteel uses a touchless biometric Kiosk to track daily time and attendance (DTR) for
+                        Interns. To get started, you need to register your face profile and generate your personal QR code.
+                        When arriving at or leaving the office, you will scan this QR code and look at the kiosk camera to
+                        verify your identity and log your hours instantly.
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="display: flex; align-items: center; gap: 6px;">
+                            Email Address <span style="color: var(--danger); font-size: 14px;">*</span>
+                        </label>
+                        <input type="email" id="internEmail" class="form-control"
+                            placeholder="Enter your active email address"
+                            value="<?= htmlspecialchars($intern['email'] ?? '') ?>" required>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">Please make
+                            sure to use an active, real email address that you have access to. Your personalized QR code
+                            will be sent here immediately, which you will need along with your face scan to clock in and
+                            out.</p>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" id="startCaptureBtn">
+                        Proceed to Camera <i class="fas fa-arrow-right" style="margin-left: 4px;"></i>
+                    </button>
+                </div>
+
+                <!-- Camera section -->
+                <div id="cameraSection" class="hidden">
+                    <div class="camera-box" id="cameraBox">
+                        <video id="webcam" autoplay playsinline></video>
+                        <div class="scanning-ring" id="scanningRing"></div>
+                        <div class="camera-overlay hidden"></div>
+                        <!-- Camera Flash Overlay -->
+                        <div id="cameraFlash" class="camera-flash"></div>
+                        <!-- Dynamic SVG face alignment guide overlay -->
+                        <svg class="svg-guide-overlay" viewBox="0 0 280 280">
+                            <circle class="guide-circle" id="guideCircle" cx="140" cy="140" r="95" />
+                        </svg>
+                    </div>
+
+                    <div id="faceWarningMessage"
+                        style="text-align: center; color: var(--danger); font-size: 12px; min-height: 18px; font-weight: 600; margin-bottom: 8px;">
+                    </div>
+
+                    <div class="steps-bar">
+                        <div class="step-dot" id="dot-0"></div>
+                        <div class="step-dot" id="dot-1"></div>
+                        <div class="step-dot" id="dot-2"></div>
+                        <div class="step-dot" id="dot-3"></div>
+                        <div class="step-dot" id="dot-4"></div>
+                    </div>
+
+                    <div class="capture-instructions" id="captureInstructions">
+                        Click Start Capture to begin face registration
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                        <button type="button" class="btn btn-primary hidden" id="captureBtn">Capture Angle</button>
+                        <button type="button" class="btn btn-secondary" id="cancelCameraBtn">Back</button>
+                    </div>
+                </div>
+
+                <div id="submittingState" class="status-card hidden">
+                    <div class="status-icon"><i class="fas fa-spinner fa-spin" style="color: var(--orange);"></i></div>
+                    <div class="status-title">Processing Face Data</div>
+                    <div class="status-text">Uploading images to ONNX model server and generating embeddings. Please wait...
+                    </div>
                 </div>
             </div>
 
-            <!-- Email confirmation -->
-            <div id="emailSection" style="display: flex; flex-direction: column; gap: 20px;">
-                <div class="form-group">
-                    <label class="form-label" style="display: flex; align-items: center; gap: 6px;">
-                        Email Address <span style="color: var(--danger); font-size: 14px;">*</span>
-                    </label>
-                    <input type="email" id="internEmail" class="form-control" placeholder="Enter your active email address" value="<?= htmlspecialchars($intern['email'] ?? '') ?>" required>
-                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">Your QR code for attendance logging will be sent to this email after face registration.</p>
+            <!-- Success Screen -->
+            <div id="successFlow" class="status-card hidden">
+                <div class="animated-envelope">
+                    <i class="fas fa-envelope-open-text"></i>
                 </div>
-                
-                <button type="button" class="btn btn-primary" id="startCaptureBtn">
-                    Proceed to Camera <i class="fas fa-arrow-right" style="margin-left: 4px;"></i>
+                <div class="status-title">Check Your Email!</div>
+                <div class="status-text" style="margin-bottom: 20px;">
+                    We have sent your unique attendance QR code to your email. You can also download it directly below.
+                </div>
+
+                <div class="qr-display" style="margin: 0 auto 10px;">
+                    <img id="qrCodeOutput" src="" alt="Intern QR Code">
+                </div>
+                <div class="code-string" id="qrCodeString" style="margin-bottom: 15px;"></div>
+
+                <button type="button" class="btn btn-primary" id="downloadQRBtn">
+                    <i class="fas fa-download"></i> Download QR Code
                 </button>
-            </div>
 
-            <!-- Camera section -->
-            <div id="cameraSection" class="hidden">
-                <div class="camera-box" id="cameraBox">
-                    <video id="webcam" autoplay playsinline></video>
-                    <div class="scanning-ring" id="scanningRing"></div>
-                    <div class="camera-overlay hidden"></div>
-                    <!-- Camera Flash Overlay -->
-                    <div id="cameraFlash" class="camera-flash"></div>
-                    <!-- Dynamic SVG face alignment guide overlay -->
-                    <svg class="svg-guide-overlay" viewBox="0 0 280 280">
-                        <circle class="guide-circle" id="guideCircle" cx="140" cy="140" r="95" />
-                    </svg>
-                </div>
-
-                <div id="faceWarningMessage" style="text-align: center; color: var(--danger); font-size: 12px; min-height: 18px; font-weight: 600; margin-bottom: 8px;"></div>
-
-                <div class="steps-bar">
-                    <div class="step-dot" id="dot-0"></div>
-                    <div class="step-dot" id="dot-1"></div>
-                    <div class="step-dot" id="dot-2"></div>
-                    <div class="step-dot" id="dot-3"></div>
-                    <div class="step-dot" id="dot-4"></div>
-                </div>
-
-                <div class="capture-instructions" id="captureInstructions">
-                    Click Start Capture to begin face registration
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                    <button type="button" class="btn btn-primary hidden" id="captureBtn">Capture Angle</button>
-                    <button type="button" class="btn btn-secondary" id="cancelCameraBtn">Back</button>
+                <div class="kiosk-tutorial">
+                    <h3><i class="fas fa-desktop" style="color: var(--orange);"></i> How to Clock In/Out at the Kiosk:</h3>
+                    <ol>
+                        <li><strong>Present QR Code:</strong> Hold your downloaded QR code in front of the kiosk camera.
+                        </li>
+                        <li><strong>Face Verification:</strong> Stand steady and look directly at the kiosk screen for quick
+                            face recognition.</li>
+                        <li><strong>Confirmation:</strong> Your time log (Time In/Out) is saved automatically!</li>
+                    </ol>
                 </div>
             </div>
+        <?php endif; ?>
+    </div>
 
-            <div id="submittingState" class="status-card hidden">
-                <div class="status-icon"><i class="fas fa-spinner fa-spin" style="color: var(--orange);"></i></div>
-                <div class="status-title">Processing Face Data</div>
-                <div class="status-text">Uploading images to ONNX model server and generating embeddings. Please wait...</div>
-            </div>
-        </div>
+    <canvas id="captureCanvas" class="hidden" width="224" height="224"></canvas>
 
-        <!-- Success Screen -->
-        <div id="successFlow" class="status-card hidden">
-            <div class="status-icon success"><i class="fas fa-check-circle"></i></div>
-            <div class="status-title">Registration Complete!</div>
-            <div class="status-text">Your face has been successfully registered. The QR code below has been emailed to you. Use it to clock in/out at the kiosk.</div>
-            <div class="qr-display">
-                <img id="qrCodeOutput" src="" alt="Intern QR Code">
-            </div>
-            <div class="code-string" id="qrCodeString"></div>
-            <button type="button" class="btn btn-secondary" style="margin-top: 15px;" id="downloadQRBtn"><i class="fas fa-download"></i> Download QR Code</button>
-        </div>
-    <?php endif; ?>
-</div>
+    <script>
+        <?php if ($intern): ?>
+            let faceLandmarker = null;
+            const overlay = document.getElementById('modelLoadingOverlay');
 
-<canvas id="captureCanvas" class="hidden" width="224" height="224"></canvas>
-
-<script>
-<?php if ($intern): ?>
-let faceLandmarker = null;
-const overlay = document.getElementById('modelLoadingOverlay');
-
-async function initializeFaceDetector() {
-    try {
-        const visionModule = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/vision_bundle.mjs");
-        const vision = await visionModule.FilesetResolver.forVisionTasks(
-            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm"
-        );
-        faceLandmarker = await visionModule.FaceLandmarker.createFromOptions(vision, {
-            baseOptions: {
-                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-                delegate: "GPU"
-            },
-            outputFacialTransformationMatrixes: true,
-            runningMode: "VIDEO",
-            numFaces: 1
-        });
-        overlay.classList.add('fade-out');
-        console.log("MediaPipe Face Landmarker initialized successfully.");
-    } catch (err) {
-        console.error("Failed to load MediaPipe. Falling back to manual capture mode:", err);
-        overlay.classList.add('fade-out');
-        alert("Face detection service is unavailable. Falling back to manual capture mode.");
-    }
-}
-
-if (document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', initializeFaceDetector);
-} else {
-    initializeFaceDetector();
-}
-
-const emailSection = document.getElementById('emailSection');
-const cameraSection = document.getElementById('cameraSection');
-const startCaptureBtn = document.getElementById('startCaptureBtn');
-const cancelCameraBtn = document.getElementById('cancelCameraBtn');
-const captureBtn = document.getElementById('captureBtn');
-const internEmail = document.getElementById('internEmail');
-const webcam = document.getElementById('webcam');
-const cameraBox = document.getElementById('cameraBox');
-const scanningRing = document.getElementById('scanningRing');
-const captureInstructions = document.getElementById('captureInstructions');
-const dots = [
-    document.getElementById('dot-0'),
-    document.getElementById('dot-1'),
-    document.getElementById('dot-2'),
-    document.getElementById('dot-3'),
-    document.getElementById('dot-4')
-];
-const canvas = document.getElementById('captureCanvas');
-const ctx = canvas.getContext('2d');
-
-let lastVideoTime = -1;
-const faceWarningMessage = document.getElementById('faceWarningMessage');
-const guideCircle = document.getElementById('guideCircle');
-
-function runDetectionLoop() {
-    if (!stream) return;
-
-    let startTimeMs = performance.now();
-    if (webcam.currentTime !== lastVideoTime) {
-        lastVideoTime = webcam.currentTime;
-        
-        if (faceLandmarker) {
-            const results = faceLandmarker.detectForVideo(webcam, startTimeMs);
-            processLandmarkResults(results);
-        }
-    }
-    requestAnimationFrame(runDetectionLoop);
-}
-
-function processLandmarkResults(results) {
-    faceWarningMessage.innerText = "";
-    guideCircle.className.baseVal = "guide-circle";
-
-    if (!results || !results.faceLandmarks || results.faceLandmarks.length === 0) {
-        faceWarningMessage.innerText = "No face detected. Align your face in the circle.";
-        guideCircle.className.baseVal = "guide-circle error-state";
-        return;
-    }
-
-    if (results.faceLandmarks.length > 1) {
-        faceWarningMessage.innerText = "Multiple faces detected. Keep only one person in frame.";
-        guideCircle.className.baseVal = "guide-circle error-state";
-        return;
-    }
-
-    guideCircle.className.baseVal = "guide-circle aligned";
-
-    if (results.facialTransformationMatrixes && results.facialTransformationMatrixes.length > 0) {
-        const matrix = results.facialTransformationMatrixes[0].data;
-        
-        const yaw = Math.atan2(-matrix[8], matrix[10]) * (180 / Math.PI);
-        const pitch = Math.asin(Math.max(-1, Math.min(1, matrix[9]))) * (180 / Math.PI);
-        
-        const landmarks = results.faceLandmarks[0];
-        if (landmarks && landmarks[263] && landmarks[33]) {
-            const width = Math.abs(landmarks[263].x - landmarks[33].x);
-            processCaptureAngles(yaw, pitch, width);
-        }
-    }
-}
-
-let initialFaceSize = null;
-let lastCaptureTime = 0;
-const CAPTURE_COOLDOWN_MS = 1500;
-let overrideTimer = null;
-
-function playShutterSound() {
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const bufferSize = audioCtx.sampleRate * 0.15;
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-        }
-        const noise = audioCtx.createBufferSource();
-        noise.buffer = buffer;
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'highpass';
-        filter.frequency.value = 1000;
-        const gainNode = audioCtx.createGain();
-        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
-        noise.connect(filter);
-        filter.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-
-        const osc = audioCtx.createOscillator();
-        const oscGain = audioCtx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(1500, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.08);
-        oscGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-        oscGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-        osc.connect(oscGain);
-        oscGain.connect(audioCtx.destination);
-
-        noise.start();
-        osc.start();
-        noise.stop(audioCtx.currentTime + 0.15);
-        osc.stop(audioCtx.currentTime + 0.15);
-        setTimeout(() => {
-            if (audioCtx.state !== 'closed') {
-                audioCtx.close();
+            async function initializeFaceDetector() {
+                try {
+                    const visionModule = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/vision_bundle.mjs");
+                    const vision = await visionModule.FilesetResolver.forVisionTasks(
+                        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.8/wasm"
+                    );
+                    faceLandmarker = await visionModule.FaceLandmarker.createFromOptions(vision, {
+                        baseOptions: {
+                            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+                            delegate: "GPU"
+                        },
+                        outputFacialTransformationMatrixes: true,
+                        runningMode: "VIDEO",
+                        numFaces: 1
+                    });
+                    overlay.classList.add('fade-out');
+                    console.log("MediaPipe Face Landmarker initialized successfully.");
+                } catch (err) {
+                    console.error("Failed to load MediaPipe. Falling back to manual capture mode:", err);
+                    overlay.classList.add('fade-out');
+                    alert("Face detection service is unavailable. Falling back to manual capture mode.");
+                }
             }
-        }, 250);
-    } catch (e) {
-        console.warn(e);
-    }
-}
 
-function triggerScreenFlash() {
-    const flash = document.getElementById('cameraFlash');
-    if (flash) {
-        flash.classList.add('flash-active');
-        setTimeout(() => {
-            flash.classList.remove('flash-active');
-        }, 150);
-    }
-}
-
-function startOverrideTimer() {
-    clearOverrideTimer();
-    overrideTimer = setTimeout(() => {
-        if (document.getElementById('manualOverrideBtn')) return;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.id = 'manualOverrideBtn';
-        btn.className = 'btn btn-override';
-        btn.innerText = 'Capture Manually (Stuck)';
-        btn.addEventListener('click', captureAutoAngle);
-        if (cancelCameraBtn && cancelCameraBtn.parentNode) {
-            cancelCameraBtn.parentNode.insertBefore(btn, cancelCameraBtn);
-        }
-    }, 10000);
-}
-
-function clearOverrideTimer() {
-    if (overrideTimer) {
-        clearTimeout(overrideTimer);
-        overrideTimer = null;
-    }
-    const btn = document.getElementById('manualOverrideBtn');
-    if (btn) {
-        btn.remove();
-    }
-}
-
-function captureAutoAngle() {
-    lastCaptureTime = Date.now();
-    playShutterSound();
-    triggerScreenFlash();
-    ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-    const base64Data = dataUrl.split(',')[1];
-    capturedImages.push(base64Data);
-    dots[currentStep].classList.remove('active');
-    dots[currentStep].classList.add('completed');
-    currentStep++;
-    if (currentStep < 5) {
-        updateStepUI();
-    } else {
-        submitFaceData();
-    }
-}
-
-function processCaptureAngles(yaw, pitch, faceWidth) {
-    if (Date.now() - lastCaptureTime < CAPTURE_COOLDOWN_MS) return;
-    let matched = false;
-    if (currentStep === 0) {
-        if (Math.abs(yaw) <= 15 && Math.abs(pitch) <= 15) {
-            initialFaceSize = faceWidth;
-            matched = true;
-        }
-    } else if (currentStep === 1) {
-        if (Math.abs(yaw) <= 15 && Math.abs(pitch) <= 15) {
-            if (initialFaceSize !== null && faceWidth <= initialFaceSize * 0.82) {
-                matched = true;
+            if (document.readyState === 'loading') {
+                window.addEventListener('DOMContentLoaded', initializeFaceDetector);
+            } else {
+                initializeFaceDetector();
             }
-        }
-    } else if (currentStep === 2) {
-        if (yaw >= 15) {
-            matched = true;
-        }
-    } else if (currentStep === 3) {
-        if (yaw <= -15) {
-            matched = true;
-        }
-    } else if (currentStep === 4) {
-        if (pitch >= 12) {
-            matched = true;
-        }
-    }
-    if (matched) {
-        captureAutoAngle();
-    }
-}
 
-let stream = null;
-let currentStep = 0;
-const capturedImages = [];
+            const emailSection = document.getElementById('emailSection');
+            const cameraSection = document.getElementById('cameraSection');
+            const startCaptureBtn = document.getElementById('startCaptureBtn');
+            const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+            const captureBtn = document.getElementById('captureBtn');
+            const internEmail = document.getElementById('internEmail');
+            const webcam = document.getElementById('webcam');
+            const cameraBox = document.getElementById('cameraBox');
+            const scanningRing = document.getElementById('scanningRing');
+            const captureInstructions = document.getElementById('captureInstructions');
+            const dots = [
+                document.getElementById('dot-0'),
+                document.getElementById('dot-1'),
+                document.getElementById('dot-2'),
+                document.getElementById('dot-3'),
+                document.getElementById('dot-4')
+            ];
+            const canvas = document.getElementById('captureCanvas');
+            const ctx = canvas.getContext('2d');
 
-const steps = [
-    { title: "Look Straight", desc: "Position your face in the center circle and look directly at the camera." },
-    { title: "Look Straight (Far)", desc: "Maintain your gaze, but pull your head back slightly." },
-    { title: "Turn Left", desc: "Slightly rotate your face horizontally to the left." },
-    { title: "Turn Right", desc: "Slightly rotate your face horizontally to the right." },
-    { title: "Tilt Up", desc: "Tilt your chin upwards slightly." }
-];
+            let lastVideoTime = -1;
+            const faceWarningMessage = document.getElementById('faceWarningMessage');
+            const guideCircle = document.getElementById('guideCircle');
 
-startCaptureBtn.addEventListener('click', async () => {
-    const email = internEmail.value.trim();
-    if (!email || !validateEmail(email)) {
-        alert('Please enter a valid email address.');
-        return;
-    }
+            function runDetectionLoop() {
+                if (!stream) return;
 
-    try {
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: 'user',
-                width: { ideal: 640 },
-                height: { ideal: 480 }
-            },
-            audio: false
-        });
-        webcam.srcObject = stream;
-        webcam.onloadedmetadata = () => {
-            runDetectionLoop();
-        };
-        
-        emailSection.classList.add('hidden');
-        cameraSection.classList.remove('hidden');
-        cameraBox.classList.add('active');
-        scanningRing.style.display = 'block';
-        
-        currentStep = 0;
-        capturedImages.length = 0;
-        updateStepUI();
-    } catch (err) {
-        alert('Webcam access is required. Please check permissions and ensure you are using HTTPS.');
-        console.error(err);
-    }
-});
+                let startTimeMs = performance.now();
+                if (webcam.currentTime !== lastVideoTime) {
+                    lastVideoTime = webcam.currentTime;
 
-cancelCameraBtn.addEventListener('click', stopCamera);
+                    if (faceLandmarker) {
+                        const results = faceLandmarker.detectForVideo(webcam, startTimeMs);
+                        processLandmarkResults(results);
+                    }
+                }
+                requestAnimationFrame(runDetectionLoop);
+            }
 
-captureBtn.addEventListener('click', captureAutoAngle);
+            function processLandmarkResults(results) {
+                faceWarningMessage.innerText = "";
+                guideCircle.className.baseVal = "guide-circle";
 
-function updateStepUI() {
-    dots.forEach((dot, idx) => {
-        if (idx === currentStep) {
-            dot.classList.add('active');
-        } else if (idx > currentStep) {
-            dot.classList.remove('active', 'completed');
-        }
-    });
+                if (!results || !results.faceLandmarks || results.faceLandmarks.length === 0) {
+                    faceWarningMessage.innerText = "No face detected. Align your face in the circle.";
+                    guideCircle.className.baseVal = "guide-circle error-state";
+                    return;
+                }
 
-    captureInstructions.innerHTML = `<strong>Step ${currentStep + 1}: ${steps[currentStep].title}</strong><br><span style="font-size:12px; color:var(--text-muted)">${steps[currentStep].desc}</span>`;
-    startOverrideTimer();
-}
+                if (results.faceLandmarks.length > 1) {
+                    faceWarningMessage.innerText = "Multiple faces detected. Keep only one person in frame.";
+                    guideCircle.className.baseVal = "guide-circle error-state";
+                    return;
+                }
 
-function stopCamera() {
-    clearOverrideTimer();
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        stream = null;
-    }
-    webcam.srcObject = null;
-    cameraSection.classList.add('hidden');
-    emailSection.classList.remove('hidden');
-    cameraBox.classList.remove('active');
-    scanningRing.style.display = 'none';
-}
+                guideCircle.className.baseVal = "guide-circle aligned";
 
-function validateEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
+                if (results.facialTransformationMatrixes && results.facialTransformationMatrixes.length > 0) {
+                    const matrix = results.facialTransformationMatrixes[0].data;
 
-function submitFaceData() {
-    stopCamera();
-    
-    document.getElementById('emailSection').classList.add('hidden');
-    document.getElementById('cameraSection').classList.add('hidden');
-    document.getElementById('submittingState').classList.remove('hidden');
+                    const yaw = Math.atan2(-matrix[8], matrix[10]) * (180 / Math.PI);
+                    const pitch = Math.asin(Math.max(-1, Math.min(1, matrix[9]))) * (180 / Math.PI);
 
-    const formData = new FormData();
-    formData.append('action', 'submit_registration');
-    formData.append('token', <?= json_encode($token) ?>);
-    formData.append('email', internEmail.value.trim());
-    capturedImages.forEach((img, idx) => {
-        formData.append(`images[${idx}]`, img);
-    });
+                    const landmarks = results.faceLandmarks[0];
+                    if (landmarks && landmarks[263] && landmarks[33]) {
+                        const width = Math.abs(landmarks[263].x - landmarks[33].x);
+                        processCaptureAngles(yaw, pitch, width);
+                    }
+                }
+            }
 
-    fetch('register', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById('submittingState').classList.add('hidden');
-        if (data.success) {
-            showSuccess(data.qr_code);
-        } else {
-            alert('Error: ' + data.error);
-            // Reset back to email stage so they can retry
-            emailSection.classList.remove('hidden');
-        }
-    })
-    .catch(err => {
-        document.getElementById('submittingState').classList.add('hidden');
-        alert('Server connection failed. Please try again.');
-        emailSection.classList.remove('hidden');
-    });
-}
+            let initialFaceSize = null;
+            let lastCaptureTime = 0;
+            const CAPTURE_COOLDOWN_MS = 1500;
+            let overrideTimer = null;
 
-function showSuccess(qrCode) {
-    document.getElementById('registrationFlow').classList.add('hidden');
-    
-    const qrOutput = document.getElementById('qrCodeOutput');
-    const qrString = document.getElementById('qrCodeString');
-    const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(qrCode);
-    
-    qrOutput.src = qrUrl;
-    qrString.innerText = qrCode;
-    
-    document.getElementById('successFlow').classList.remove('hidden');
+            function playShutterSound() {
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const bufferSize = audioCtx.sampleRate * 0.15;
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+                    const noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'highpass';
+                    filter.frequency.value = 1000;
+                    const gainNode = audioCtx.createGain();
+                    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+                    noise.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
 
-    // Setup download button
-    document.getElementById('downloadQRBtn').onclick = () => {
-        // Fetch the QR image and trigger native download
-        fetch(qrUrl)
-            .then(res => res.blob())
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = `${qrCode}.png`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(() => {
-                // Fail-safe open in new tab
-                window.open(qrUrl, '_blank');
+                    const osc = audioCtx.createOscillator();
+                    const oscGain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(1500, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.08);
+                    oscGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    oscGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.connect(oscGain);
+                    oscGain.connect(audioCtx.destination);
+
+                    noise.start();
+                    osc.start();
+                    noise.stop(audioCtx.currentTime + 0.15);
+                    osc.stop(audioCtx.currentTime + 0.15);
+                    setTimeout(() => {
+                        if (audioCtx.state !== 'closed') {
+                            audioCtx.close();
+                        }
+                    }, 250);
+                } catch (e) {
+                    console.warn(e);
+                }
+            }
+
+            function triggerScreenFlash() {
+                const flash = document.getElementById('cameraFlash');
+                if (flash) {
+                    flash.classList.add('flash-active');
+                    setTimeout(() => {
+                        flash.classList.remove('flash-active');
+                    }, 150);
+                }
+            }
+
+            function startOverrideTimer() {
+                clearOverrideTimer();
+                overrideTimer = setTimeout(() => {
+                    if (document.getElementById('manualOverrideBtn')) return;
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.id = 'manualOverrideBtn';
+                    btn.className = 'btn btn-override';
+                    btn.innerText = 'Capture Manually (Stuck)';
+                    btn.addEventListener('click', captureAutoAngle);
+                    if (cancelCameraBtn && cancelCameraBtn.parentNode) {
+                        cancelCameraBtn.parentNode.insertBefore(btn, cancelCameraBtn);
+                    }
+                }, 10000);
+            }
+
+            function clearOverrideTimer() {
+                if (overrideTimer) {
+                    clearTimeout(overrideTimer);
+                    overrideTimer = null;
+                }
+                const btn = document.getElementById('manualOverrideBtn');
+                if (btn) {
+                    btn.remove();
+                }
+            }
+
+            function captureAutoAngle() {
+                lastCaptureTime = Date.now();
+                playShutterSound();
+                triggerScreenFlash();
+                ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                const base64Data = dataUrl.split(',')[1];
+                capturedImages.push(base64Data);
+                dots[currentStep].classList.remove('active');
+                dots[currentStep].classList.add('completed');
+                currentStep++;
+                if (currentStep < 5) {
+                    updateStepUI();
+                } else {
+                    submitFaceData();
+                }
+            }
+
+            function processCaptureAngles(yaw, pitch, faceWidth) {
+                if (Date.now() - lastCaptureTime < CAPTURE_COOLDOWN_MS) return;
+                let matched = false;
+                if (currentStep === 0) {
+                    if (Math.abs(yaw) <= 15 && Math.abs(pitch) <= 15) {
+                        initialFaceSize = faceWidth;
+                        matched = true;
+                    }
+                } else if (currentStep === 1) {
+                    if (Math.abs(yaw) <= 15 && Math.abs(pitch) <= 15) {
+                        if (initialFaceSize !== null && faceWidth <= initialFaceSize * 0.82) {
+                            matched = true;
+                        }
+                    }
+                } else if (currentStep === 2) {
+                    if (yaw >= 15) {
+                        matched = true;
+                    }
+                } else if (currentStep === 3) {
+                    if (yaw <= -15) {
+                        matched = true;
+                    }
+                } else if (currentStep === 4) {
+                    if (pitch >= 12) {
+                        matched = true;
+                    }
+                }
+                if (matched) {
+                    captureAutoAngle();
+                }
+            }
+
+            let stream = null;
+            let currentStep = 0;
+            const capturedImages = [];
+
+            const steps = [
+                { title: "Look Straight", desc: "Position your face in the center circle and look directly at the camera." },
+                { title: "Look Straight (Far)", desc: "Maintain your gaze, but pull your head back slightly." },
+                { title: "Turn Left", desc: "Slightly rotate your face horizontally to the left." },
+                { title: "Turn Right", desc: "Slightly rotate your face horizontally to the right." },
+                { title: "Tilt Up", desc: "Tilt your chin upwards slightly." }
+            ];
+
+            startCaptureBtn.addEventListener('click', async () => {
+                const email = internEmail.value.trim();
+                if (!email || !validateEmail(email)) {
+                    alert('Please enter a valid email address.');
+                    return;
+                }
+
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'user',
+                            width: { ideal: 640 },
+                            height: { ideal: 480 }
+                        },
+                        audio: false
+                    });
+                    webcam.srcObject = stream;
+                    webcam.onloadedmetadata = () => {
+                        runDetectionLoop();
+                    };
+
+                    emailSection.classList.add('hidden');
+                    cameraSection.classList.remove('hidden');
+                    cameraBox.classList.add('active');
+                    scanningRing.style.display = 'block';
+
+                    currentStep = 0;
+                    capturedImages.length = 0;
+                    updateStepUI();
+                } catch (err) {
+                    alert('Webcam access is required. Please check permissions and ensure you are using HTTPS.');
+                    console.error(err);
+                }
             });
-    };
-}
-<?php endif; ?>
-</script>
+
+            cancelCameraBtn.addEventListener('click', stopCamera);
+
+            captureBtn.addEventListener('click', captureAutoAngle);
+
+            function updateStepUI() {
+                dots.forEach((dot, idx) => {
+                    if (idx === currentStep) {
+                        dot.classList.add('active');
+                    } else if (idx > currentStep) {
+                        dot.classList.remove('active', 'completed');
+                    }
+                });
+
+                captureInstructions.innerHTML = `<strong>Step ${currentStep + 1}: ${steps[currentStep].title}</strong><br><span style="font-size:12px; color:var(--text-muted)">${steps[currentStep].desc}</span>`;
+                startOverrideTimer();
+            }
+
+            function stopCamera() {
+                clearOverrideTimer();
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                }
+                webcam.srcObject = null;
+                cameraSection.classList.add('hidden');
+                emailSection.classList.remove('hidden');
+                cameraBox.classList.remove('active');
+                scanningRing.style.display = 'none';
+            }
+
+            function validateEmail(email) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            }
+
+            function submitFaceData() {
+                stopCamera();
+
+                document.getElementById('emailSection').classList.add('hidden');
+                document.getElementById('cameraSection').classList.add('hidden');
+                document.getElementById('submittingState').classList.remove('hidden');
+
+                const formData = new FormData();
+                formData.append('action', 'submit_registration');
+                formData.append('token', <?= json_encode($token) ?>);
+                formData.append('email', internEmail.value.trim());
+                capturedImages.forEach((img, idx) => {
+                    formData.append(`images[${idx}]`, img);
+                });
+
+                fetch('register', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById('submittingState').classList.add('hidden');
+                        if (data.success) {
+                            showSuccess(data.qr_code);
+                        } else {
+                            alert('Error: ' + data.error);
+                            // Reset back to email stage so they can retry
+                            emailSection.classList.remove('hidden');
+                        }
+                    })
+                    .catch(err => {
+                        document.getElementById('submittingState').classList.add('hidden');
+                        alert('Server connection failed. Please try again.');
+                        emailSection.classList.remove('hidden');
+                    });
+            }
+
+            function showSuccess(qrCode) {
+                document.getElementById('registrationFlow').classList.add('hidden');
+
+                const qrOutput = document.getElementById('qrCodeOutput');
+                const qrString = document.getElementById('qrCodeString');
+                const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(qrCode);
+
+                qrOutput.src = qrUrl;
+                qrString.innerText = qrCode;
+
+                document.getElementById('successFlow').classList.remove('hidden');
+
+                // Setup download button
+                document.getElementById('downloadQRBtn').onclick = () => {
+                    // Fetch the QR image and trigger native download
+                    fetch(qrUrl)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = `${qrCode}.png`;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                        })
+                        .catch(() => {
+                            // Fail-safe open in new tab
+                            window.open(qrUrl, '_blank');
+                        });
+                };
+            }
+        <?php endif; ?>
+    </script>
 </body>
+
 </html>
