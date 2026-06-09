@@ -221,24 +221,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
 
         .header {
-            background: #111214;
-            padding: 24px 20px;
+            padding: 28px 20px 10px;
             text-align: center;
-            border-bottom: 3px solid var(--orange);
-        }
-
-        .header h1 {
-            color: var(--white);
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
         }
 
         .header p {
             color: var(--text-muted);
-            font-size: 12px;
-            margin-top: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 6px;
         }
 
         .content {
@@ -647,6 +638,234 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         .kiosk-tutorial li strong {
             color: var(--orange);
         }
+
+        /* Toggler why info styles */
+        .info-toggle-container {
+            margin-bottom: 4px;
+        }
+
+        .info-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--orange);
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: 4px 0;
+            outline: none;
+            transition: color 0.2s;
+            font-family: inherit;
+        }
+
+        .info-toggle-btn:hover {
+            color: var(--orange-dark);
+        }
+
+        .info-toggle-content {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-muted);
+            background: var(--gray-light);
+            padding: 12px 14px;
+            border-radius: 10px;
+            border-left: 3px solid var(--orange);
+            margin-top: 8px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Email form highlight styles */
+        .form-group-highlight {
+            background: var(--orange-light);
+            border: 1.5px solid rgba(255, 107, 26, 0.25);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(255, 107, 26, 0.05);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group-highlight:focus-within {
+            border-color: var(--orange);
+            box-shadow: 0 4px 12px rgba(255, 107, 26, 0.12);
+        }
+
+        .form-group-highlight .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .form-group-highlight .form-control {
+            background: var(--white);
+            border: 1.5px solid var(--gray-border);
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .form-group-highlight .form-control:focus {
+            border-color: var(--orange);
+        }
+
+        .form-group-highlight.invalid {
+            border-color: var(--danger) !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15) !important;
+        }
+
+        .form-group-highlight.invalid .form-label {
+            color: var(--danger);
+        }
+
+        .form-group-highlight.invalid .form-control {
+            border-color: var(--danger);
+        }
+
+        .error-text {
+            color: var(--danger);
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 6px;
+            display: block;
+        }
+
+        /* Shake animation keyframes */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Custom Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 18, 20, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            animation: fadeInModal 0.25s ease-out;
+        }
+
+        .modal-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--gray-border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUpModal {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: var(--orange-light);
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 107, 26, 0.15);
+        }
+
+        .modal-icon {
+            font-size: 32px;
+            color: var(--orange);
+        }
+
+        .modal-header h2 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-intro {
+            font-size: 13px;
+            color: var(--text-main);
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .help-section {
+            background: var(--gray-light);
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--gray-border);
+        }
+
+        .help-section h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .help-section h3 i {
+            color: var(--orange);
+        }
+
+        .help-section p {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .help-section strong {
+            color: var(--text-main);
+        }
+
+        .modal-footer {
+            padding: 16px 20px 20px;
+            border-top: 1px solid var(--gray-border);
+        }
     </style>
 </head>
 
@@ -662,9 +881,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     <div class="container">
         <div class="header">
-            <img src="/uploads/photos/logo-dark.png" alt="TDT Powersteel Logo"
-                style="height: 48px; margin-bottom: 12px; object-fit: contain;">
-            <h1>TDT Powersteel</h1>
+            <img src="assets/img/tdt-logo.png" alt="TDT Powersteel Logo"
+                style="height: auto; max-height: 40px; max-width: 260px; width: 100%; object-fit: contain; margin: 0 auto 4px; display: block;">
             <p>Intern Face Registration</p>
         </div>
 
@@ -691,21 +909,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
                 <!-- Email confirmation -->
                 <div id="emailSection" style="display: flex; flex-direction: column; gap: 20px;">
-                    <div
-                        style="font-size: 13px; line-height: 1.5; color: var(--text-muted); background: var(--gray-light); padding: 12px 14px; border-radius: 10px; border-left: 3px solid var(--orange);">
-                        TDT Powersteel uses a touchless biometric Kiosk to track daily time and attendance (DTR) for
-                        Interns. To get started, you need to register your face profile and generate your personal QR code.
-                        When arriving at or leaving the office, you will scan this QR code and look at the kiosk camera to
-                        verify your identity and log your hours instantly.
+                    <div class="info-toggle-container">
+                        <button type="button" class="info-toggle-btn" id="infoToggleBtn">
+                            <i class="fas fa-question-circle" style="font-size: 16px;"></i> Why do we register face &amp; QR?
+                        </button>
+                        <div class="info-toggle-content hidden" id="infoToggleContent">
+                            TDT Powersteel uses a touchless biometric Kiosk to track daily time and attendance (DTR) for
+                            Interns. To get started, you need to register your face profile and generate your personal QR code.
+                            When arriving at or leaving the office, you will scan this QR code and look at the kiosk camera to
+                            verify your identity and log your hours instantly.
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" style="display: flex; align-items: center; gap: 6px;">
-                            Email Address <span style="color: var(--danger); font-size: 14px;">*</span>
+
+                    <div class="form-group-highlight" id="emailFormGroup">
+                        <label class="form-label">
+                            <i class="fas fa-envelope-open-text" style="color: var(--orange); margin-right: 4px;"></i> Email Address <span style="color: var(--danger); font-size: 14px;">*</span>
                         </label>
                         <input type="email" id="internEmail" class="form-control"
                             placeholder="Enter your active email address"
                             value="<?= htmlspecialchars($intern['email'] ?? '') ?>" required>
-                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4;">Please make
+                        <div id="emailError" class="error-text hidden"></div>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px; line-height: 1.4;">Please make
                             sure to use an active, real email address that you have access to. Your personalized QR code
                             will be sent here immediately, which you will need along with your face scan to clock in and
                             out.</p>
@@ -793,6 +1017,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         <?php endif; ?>
     </div>
 
+    <!-- Camera Error Help Modal -->
+    <div id="cameraErrorModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <i class="fas fa-video-slash modal-icon"></i>
+                <h2>Camera Access Required</h2>
+            </div>
+            <div class="modal-body">
+                <p class="modal-intro">We couldn't access your camera. This is usually due to browser permissions or restriction settings.</p>
+                
+                <div class="help-section">
+                    <h3><i class="fab fa-facebook-messenger"></i> Using Messenger/Viber?</h3>
+                    <p>In-app browsers (like Facebook Messenger or Viber) block camera access. Tap the <strong>three dots (...)</strong> or the <strong>Share</strong> icon in the top right, then select <strong>"Open in Chrome"</strong> or <strong>"Open in Safari"</strong>.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3><i class="fas fa-mobile-alt"></i> Enforce Phone Usage</h3>
+                    <p>We highly recommend using a <strong>smartphone</strong> rather than a laptop. Mobile front-facing cameras have significantly higher quality, better autofocus, and auto-exposure, leading to a much faster and more accurate face scan.</p>
+                </div>
+
+                <div class="help-section">
+                    <h3><i class="fas fa-user-shield"></i> Grant Camera Permission</h3>
+                    <p>When prompted by your browser (Chrome/Safari), make sure to click <strong>"Allow"</strong> or <strong>"Grant Permission"</strong> to enable the camera.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="closeErrorModalBtn">I Understand</button>
+            </div>
+        </div>
+    </div>
+
     <canvas id="captureCanvas" class="hidden" width="224" height="224"></canvas>
 
     <script>
@@ -840,6 +1095,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             const cameraBox = document.getElementById('cameraBox');
             const scanningRing = document.getElementById('scanningRing');
             const captureInstructions = document.getElementById('captureInstructions');
+
+            // Toggle why info
+            const infoToggleBtn = document.getElementById('infoToggleBtn');
+            const infoToggleContent = document.getElementById('infoToggleContent');
+            if (infoToggleBtn && infoToggleContent) {
+                infoToggleBtn.addEventListener('click', () => {
+                    infoToggleContent.classList.toggle('hidden');
+                });
+            }
+
+            // Clear email validation error on typing
+            if (internEmail) {
+                internEmail.addEventListener('input', () => {
+                    const emailError = document.getElementById('emailError');
+                    const emailFormGroup = document.getElementById('emailFormGroup');
+                    if (emailError) {
+                        emailError.innerText = '';
+                        emailError.classList.add('hidden');
+                    }
+                    if (emailFormGroup) {
+                        emailFormGroup.classList.remove('invalid', 'shake');
+                    }
+                });
+            }
+
+            // Close camera error modal
+            const closeErrorModalBtn = document.getElementById('closeErrorModalBtn');
+            const cameraErrorModal = document.getElementById('cameraErrorModal');
+            if (closeErrorModalBtn && cameraErrorModal) {
+                closeErrorModalBtn.addEventListener('click', () => {
+                    cameraErrorModal.classList.add('hidden');
+                });
+            }
             const dots = [
                 document.getElementById('dot-0'),
                 document.getElementById('dot-1'),
@@ -1052,8 +1340,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             startCaptureBtn.addEventListener('click', async () => {
                 const email = internEmail.value.trim();
-                if (!email || !validateEmail(email)) {
-                    alert('Please enter a valid email address.');
+                const emailError = document.getElementById('emailError');
+                const emailFormGroup = document.getElementById('emailFormGroup');
+
+                // Clear previous errors
+                if (emailError) {
+                    emailError.innerText = '';
+                    emailError.classList.add('hidden');
+                }
+                if (emailFormGroup) {
+                    emailFormGroup.classList.remove('invalid', 'shake');
+                }
+
+                if (!email) {
+                    if (emailError && emailFormGroup) {
+                        emailError.innerText = 'Email address is required.';
+                        emailError.classList.remove('hidden');
+                        emailFormGroup.classList.add('invalid');
+                        void emailFormGroup.offsetWidth; // trigger reflow
+                        emailFormGroup.classList.add('shake');
+                    }
+                    return;
+                }
+
+                if (!validateEmail(email)) {
+                    if (emailError && emailFormGroup) {
+                        emailError.innerText = 'Please enter a valid email address.';
+                        emailError.classList.remove('hidden');
+                        emailFormGroup.classList.add('invalid');
+                        void emailFormGroup.offsetWidth; // trigger reflow
+                        emailFormGroup.classList.add('shake');
+                    }
                     return;
                 }
 
@@ -1080,8 +1397,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     capturedImages.length = 0;
                     updateStepUI();
                 } catch (err) {
-                    alert('Webcam access is required. Please check permissions and ensure you are using HTTPS.');
                     console.error(err);
+                    const modal = document.getElementById('cameraErrorModal');
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                    }
                 }
             });
 

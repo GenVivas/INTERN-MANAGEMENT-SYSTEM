@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'success' => true,
                     'token' => $token,
                     'expires_at' => $expiresAt,
-                    'url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register?token=' . $token
+                    'url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register_face.php?token=' . $token
                 ]);
                 exit;
             } elseif ($action === 're_register') {
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'success' => true,
                     'token' => $token,
                     'expires_at' => $expiresAt,
-                    'url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register?token=' . $token
+                    'url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register_face.php?token=' . $token
                 ]);
                 exit;
             }
@@ -232,14 +232,14 @@ require_once __DIR__ . '/includes/header.php';
                                 </button>
                             <?php else: ?>
                                 <?php if ($isTokenActive): ?>
-                                    <button class="btn btn-icon btn-sm" title="Copy Registration Link" onclick="copyLink('<?= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register?token=' . $intern['registration_token'] ?>', '<?= htmlspecialchars($intern['first_name'], ENT_QUOTES) ?>')">
+                                    <button class="btn btn-icon btn-sm" title="Copy Registration Link" onclick="copyLink('<?= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/register_face.php?token=' . $intern['registration_token'] ?>', '<?= htmlspecialchars($intern['first_name'], ENT_QUOTES) ?>')">
                                         <i class="fas fa-copy" style="color: #3B82F6;"></i>
                                     </button>
-                                    <button class="btn btn-icon btn-sm" title="Re-generate Link" onclick="generateLink(<?= $intern['id'] ?>, '<?= htmlspecialchars($intern['first_name'].' '.$intern['last_name'], ENT_QUOTES) ?>')">
+                                    <button class="btn btn-icon btn-sm" title="Re-generate Link" onclick="generateLink(<?= $intern['id'] ?>, '<?= htmlspecialchars($intern['first_name'].' '.$intern['last_name'], ENT_QUOTES) ?>', true)">
                                         <i class="fas fa-sync-alt" style="color: #F59E0B;"></i>
                                     </button>
                                 <?php else: ?>
-                                    <button class="btn btn-icon btn-sm" title="Generate Registration Link" onclick="generateLink(<?= $intern['id'] ?>, '<?= htmlspecialchars($intern['first_name'].' '.$intern['last_name'], ENT_QUOTES) ?>')">
+                                    <button class="btn btn-icon btn-sm" title="Generate Registration Link" onclick="generateLink(<?= $intern['id'] ?>, '<?= htmlspecialchars($intern['first_name'].' '.$intern['last_name'], ENT_QUOTES) ?>', false)">
                                         <i class="fas fa-link" style="color: var(--orange);"></i>
                                     </button>
                                 <?php endif; ?>
@@ -329,15 +329,21 @@ function copyLink(link, name) {
     });
 }
 
-function generateLink(id, name) {
+function generateLink(id, name, isRegenerate) {
+    const title = isRegenerate ? 'Regenerate Link' : 'Generate Link';
+    const text = isRegenerate 
+        ? 'Regenerate a new 24-hour face registration link for ' + name + '? The previous active link will be invalidated.'
+        : 'Generate a new 24-hour face registration link for ' + name + '?';
+    const confirmButtonText = isRegenerate ? 'Yes, regenerate' : 'Yes, generate';
+
     Swal.fire({
-        title: 'Generate Link',
-        text: 'Generate a new 24-hour face registration link for ' + name + '?',
+        title: title,
+        text: text,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#FF6B1A',
         cancelButtonColor: '#8A8B8D',
-        confirmButtonText: 'Yes, generate'
+        confirmButtonText: confirmButtonText
     }).then((result) => {
         if (result.isConfirmed) {
             const formData = new FormData();
