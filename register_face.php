@@ -15,6 +15,31 @@ if ($token) {
     $stmt->close();
 }
 
+// Handle AJAX email availability check
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'check_email_availability') {
+    header('Content-Type: application/json');
+    if (!$intern) {
+        echo json_encode(['success' => false, 'error' => 'Invalid or expired registration token.']);
+        exit;
+    }
+    $email = trim($_POST['email'] ?? '');
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['success' => false, 'available' => false, 'error' => 'Please provide a valid email address.']);
+        exit;
+    }
+    $stmt = $db->prepare("SELECT id FROM interns WHERE email = ? AND id != ? AND status = 'Active'");
+    $stmt->bind_param('si', $email, $intern['id']);
+    $stmt->execute();
+    $existing = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if ($existing) {
+        echo json_encode(['success' => true, 'available' => false, 'message' => 'This email is already in use by another active intern.']);
+    } else {
+        echo json_encode(['success' => true, 'available' => true]);
+    }
+    exit;
+}
+
 // Handle AJAX face data submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_registration') {
     header('Content-Type: application/json');
@@ -28,6 +53,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo json_encode(['success' => false, 'error' => 'Please provide a valid email address.']);
+        exit;
+    }
+
+    // Check duplicate email
+    $stmt = $db->prepare("SELECT id FROM interns WHERE email = ? AND id != ? AND status = 'Active'");
+    $stmt->bind_param('si', $email, $intern['id']);
+    $stmt->execute();
+    $existing = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if ($existing) {
+        echo json_encode(['success' => false, 'error' => 'This email is already registered to another active intern.']);
         exit;
     }
 
@@ -1439,6 +1475,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         emailFormGroup.classList.add('shake');
                     }
                     return;
+                }
+
+                // Check email availability via AJAX
+                try {
+                    startCaptureBtn.disabled = true;
+                    startCaptureBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 4px;"></i> Verifying...';
+
+                    const checkData = new FormData();
+                    checkData.append('action', 'check_email_availability');
+                    checkData.append('email', email);
+                    checkData.append('token', <?= json_encode($token) ?>);
+
+                    const res = await fetch('register_face.php', {
+                        method: 'POST',
+                        body: checkData
+                    });
+                    const data = await res.json();
+                    
+                    if (!data.success || !data.available) {
+                        if (emailError && emailFormGroup) {
+                            emailError.innerText = data.message || data.error || 'This email is already registered.';
+                            emailError.classList.remove('hidden');
+                            emailFormGroup.classList.add('invalid');
+                            void emailFormGroup.offsetWidth;
+                            emailFormGroup.classList.add('shake');
+                        }
+                        return;
+                    }
+                } catch (ajaxErr) {
+                    console.error("Email verification failed:", ajaxErr);
+                } finally {
+                    startCaptureBtn.disabled = false;
+                    startCaptureBtn.innerHTML = 'Next: Camera Capture <i class="fas fa-arrow-right" style="margin-left: 4px;"></i>';
                 }
 
                 try {
