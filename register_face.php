@@ -963,7 +963,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         <div class="step-dot" id="dot-1"></div>
                         <div class="step-dot" id="dot-2"></div>
                         <div class="step-dot" id="dot-3"></div>
-                        <div class="step-dot" id="dot-4"></div>
                     </div>
 
                     <div class="capture-instructions" id="captureInstructions">
@@ -978,9 +977,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
                 <div id="submittingState" class="status-card hidden">
                     <div class="status-icon"><i class="fas fa-spinner fa-spin" style="color: var(--orange);"></i></div>
-                    <div class="status-title">Processing Face Data</div>
-                    <div class="status-text">Uploading images to ONNX model server and generating embeddings. Please wait...
-                    </div>
+                    <div class="status-title">Analyzing Face Profiles</div>
+                    <div class="status-text">Analyzing your captured photos and securing your Face ID profile. Please do not close this window.</div>
                 </div>
             </div>
 
@@ -1132,8 +1130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 document.getElementById('dot-0'),
                 document.getElementById('dot-1'),
                 document.getElementById('dot-2'),
-                document.getElementById('dot-3'),
-                document.getElementById('dot-4')
+                document.getElementById('dot-3')
             ];
             const canvas = document.getElementById('captureCanvas');
             const ctx = canvas.getContext('2d');
@@ -1314,17 +1311,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 lastCaptureTime = Date.now();
                 playShutterSound();
                 triggerScreenFlash();
-                ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+                
+                // Capture first frontal frame (cropping center square to prevent distortion)
+                const vWidth1 = webcam.videoWidth;
+                const vHeight1 = webcam.videoHeight;
+                const minDim1 = Math.min(vWidth1, vHeight1);
+                const sx1 = (vWidth1 - minDim1) / 2;
+                const sy1 = (vHeight1 - minDim1) / 2;
+                ctx.drawImage(webcam, sx1, sy1, minDim1, minDim1, 0, 0, canvas.width, canvas.height);
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
                 const base64Data = dataUrl.split(',')[1];
                 capturedImages.push(base64Data);
-                dots[currentStep].classList.remove('active');
-                dots[currentStep].classList.add('completed');
-                currentStep++;
-                if (currentStep < 5) {
-                    updateStepUI();
+
+                if (currentStep === 0) {
+                    // Capture second frontal frame silently 200ms later
+                    setTimeout(() => {
+                        if (!stream) return;
+                        // Crop center square for the second silent capture
+                        const vWidth2 = webcam.videoWidth;
+                        const vHeight2 = webcam.videoHeight;
+                        const minDim2 = Math.min(vWidth2, vHeight2);
+                        const sx2 = (vWidth2 - minDim2) / 2;
+                        const sy2 = (vHeight2 - minDim2) / 2;
+                        ctx.drawImage(webcam, sx2, sy2, minDim2, minDim2, 0, 0, canvas.width, canvas.height);
+                        const dataUrl2 = canvas.toDataURL('image/jpeg', 0.95);
+                        const base64Data2 = dataUrl2.split(',')[1];
+                        capturedImages.push(base64Data2);
+
+                        dots[currentStep].classList.remove('active');
+                        dots[currentStep].classList.add('completed');
+                        currentStep++;
+                        updateStepUI();
+                    }, 200);
                 } else {
-                    submitFaceData();
+                    dots[currentStep].classList.remove('active');
+                    dots[currentStep].classList.add('completed');
+                    currentStep++;
+                    if (currentStep < 4) {
+                        updateStepUI();
+                    } else {
+                        submitFaceData();
+                    }
                 }
             }
 
@@ -1339,20 +1366,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         matched = true;
                     }
                 } else if (currentStep === 1) {
-                    if (Math.abs(yaw) <= 15 && Math.abs(pitch) <= 15) {
-                        if (initialFaceSize !== null && faceWidth <= initialFaceSize * 0.82) {
-                            matched = true;
-                        }
-                    }
-                } else if (currentStep === 2) {
                     if (yaw >= 15) {
                         matched = true;
                     }
-                } else if (currentStep === 3) {
+                } else if (currentStep === 2) {
                     if (yaw <= -15) {
                         matched = true;
                     }
-                } else if (currentStep === 4) {
+                } else if (currentStep === 3) {
                     if (pitch >= 12) {
                         matched = true;
                     }
@@ -1366,9 +1387,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         poseStableStartTime = Date.now();
                     } else if (Date.now() - poseStableStartTime >= STABLE_DURATION_MS) {
                         poseStableStartTime = null;
-                        if (currentStep === 0) {
-                            initialFaceSize = faceWidth;
-                        }
                         captureAutoAngle();
                     }
                 } else {
@@ -1382,7 +1400,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
             const steps = [
                 { title: "Look Straight", desc: "Position your face in the center circle and look directly at the camera." },
-                { title: "Look Straight (Far)", desc: "Maintain your gaze, but pull your head back slightly." },
                 { title: "Turn Left", desc: "Slightly rotate your face horizontally to the left." },
                 { title: "Turn Right", desc: "Slightly rotate your face horizontally to the right." },
                 { title: "Tilt Up", desc: "Tilt your chin upwards slightly." }
