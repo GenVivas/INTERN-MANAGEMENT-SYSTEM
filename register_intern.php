@@ -777,7 +777,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 const minDim1 = Math.min(vWidth1, vHeight1);
                 const sx1 = (vWidth1 - minDim1) / 2;
                 const sy1 = (vHeight1 - minDim1) / 2;
+                
+                ctx.save();
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
                 ctx.drawImage(webcam, sx1, sy1, minDim1, minDim1, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+                
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
                 const base64Data = dataUrl.split(',')[1];
                 capturedImages.push(base64Data);
@@ -792,7 +798,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         const minDim2 = Math.min(vWidth2, vHeight2);
                         const sx2 = (vWidth2 - minDim2) / 2;
                         const sy2 = (vHeight2 - minDim2) / 2;
+                        
+                        ctx.save();
+                        ctx.translate(canvas.width, 0);
+                        ctx.scale(-1, 1);
                         ctx.drawImage(webcam, sx2, sy2, minDim2, minDim2, 0, 0, canvas.width, canvas.height);
+                        ctx.restore();
+                        
                         const dataUrl2 = canvas.toDataURL('image/jpeg', 0.95);
                         const base64Data2 = dataUrl2.split(',')[1];
                         capturedImages.push(base64Data2);
