@@ -87,3 +87,29 @@ Modern mobile web browsers strictly block camera access (`navigator.mediaDevices
    * **Website root directory for validation:** Point to your Apache document root (e.g. `/var/www/html/INTERN-MANAGEMENT-SYSTEM`).
 4. Click **Request Certificate**.
 5. Once obtained, configure Apache to use this SSL certificate for your Port `443` Virtual Host.
+
+---
+
+## Step 5: Deploy the HRIS Kiosk PHP Backend
+
+1. **Virtual Host Configuration**:
+   - Create a virtual host in Apache for the Kiosk backend (Webmin -> **Servers** > **Apache Webserver**).
+   - Set the **Document Root** to the public subdirectory of your Kiosk backend folder (e.g. `/var/www/html/HRIS-KIOSK/backend-php/public`).
+2. **Environment Variable Configuration**:
+   - Create or edit the `.env` configuration file inside `/var/www/html/HRIS-KIOSK/backend-php/.env`.
+   - Set the directory mode and database connection variables:
+     ```ini
+     # Switch Kiosk database target: 'employee' (Supabase) or 'intern' (Local MySQL)
+     KIOSK_MODE=intern
+     
+     # Local IMS MySQL Credentials
+     IMS_DB_HOST=localhost
+     IMS_DB_USER=root
+     IMS_DB_PASS=
+     IMS_DB_NAME=tdt_ims
+     
+     # Optional: Explicit override for IMS backend URL (highly recommended if virtual hosts run on separate domains)
+     # E.g., if IMS is hosted at ims.local and Kiosk is at kiosk.local
+     IMS_URL=http://ims.local
+     ```
+   - *Note: If `IMS_URL` is omitted, the backend dynamically resolves custom development ports (redirecting internally to port `8002` during local testing) and falls back to the `/ims` subdirectory in standard Apache deployments.*

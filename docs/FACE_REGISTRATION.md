@@ -96,3 +96,34 @@ The captures are sent to the local endpoint:
 * **AJAX URL:** `register` (relative rewrite from `register_face.php`)
 * **Payload:** 5 base64 JPEG strings inside `images` array.
 * **Face Embeddings:** Backend forwards the base64 captures to the Python ONNX service (`http://localhost:5001/embed`), generating a `512-dimension` vector array saved as `face_embedding` inside the database.
+
+---
+
+## 7. Onboarding Tutorial & Guide Overlay
+
+To prepare the user before using the camera scanner, the portal implements a smartphone-mockup styled **Onboarding Tutorial Modal** with the following details:
+1. **Interactive Slideshow**: Uses CSS scroll snap mandatory (`scroll-snap-type: x mandatory`) to support native touch swiping and scroll-snapping on mobile and desktop devices.
+2. **Dynamic Indicators**: A scroll event listener calculates the scroll offset dynamically, updating the active dot indicator and action buttons in real-time.
+3. **Gender-Specific Illustrative Guides**: The system queries the database token to detect the intern's gender, loading female (`_f.png`) or male (`_m.png` / default) visual illustration guides for the 4 capture poses (Straight, Left, Right, Up).
+4. **Optimized Spacers**: Slide cards utilize invisible vertical spacer elements to eliminate height-shifting jitter during transitions.
+5. **Ergonomic Footer**: Dot indicators and navigation buttons are pinned inside a static footer at the bottom of the card, prioritizing thumb-zone reachability on mobile devices.
+
+---
+
+## 8. User Validation & Security Guards
+
+1. **SweetAlert2 Manual Capture Guard**:
+   When the user activates the manual capture override (triggered after a 10-second auto-scan delay), the process is intercepted by a SweetAlert2 confirmation modal. This modal displays the active step's required position and requests verification that the face is aligned before capturing the photo.
+2. **Real-Time Email Uniqueness Check**:
+   During initial details entry, entering the email triggers a real-time AJAX check. If the email is already registered to another active intern, a shake animation is triggered on the form, and a warning appears: *"This email is already registered."*
+3. **Link Expiration Alert**:
+   If an intern attempts to access the page with an expired or invalid token, the scanner wizard is hidden. The system triggers an immediate SweetAlert2 error popup informing them that the registration link is invalid.
+
+---
+
+## 9. UI Layout & Mirroring Feedback
+
+1. **Natural Camera Preview Mirroring**:
+   To prevent cognitive load, the active camera stream is horizontally mirrored (`transform: scaleX(-1)`) so it behaves like a standard bathroom mirror. The profile avatar images inside `interns.php` and `intern_workspace.php` also utilize horizontal mirroring for a natural preview, while the raw base64 data sent to the face embedding server remains unmirrored for mathematical accuracy.
+2. **Smooth Info Accordions**:
+   The "Why do we need to register?" info container features a CSS accordion animation, dynamically transition-animating `max-height`, `opacity`, and margins when toggled.
