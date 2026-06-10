@@ -22,22 +22,24 @@ const rl = readline.createInterface({
 
 const activeProcesses = [];
 
-function startProcess(name, command, args, color, cwd = process.cwd()) {
+function startProcess(name, command, args, color, cwd = process.cwd(), customStdio = null) {
   console.log(`${colors.bright}${color}  ${name.toUpperCase()}  ${colors.reset} Starting...`);
   const proc = spawn(command, args, {
-    stdio: ['inherit', 'pipe', 'inherit'],
+    stdio: customStdio || ['inherit', 'pipe', 'inherit'],
     shell: true,
     cwd
   });
 
-  proc.stdout.on('data', (data) => {
-    const lines = data.toString().split('\n');
-    lines.forEach(line => {
-      if (line.trim()) {
-        process.stdout.write(`${color}[${name}]${colors.reset} ${line}\n`);
-      }
+  if (proc.stdout) {
+    proc.stdout.on('data', (data) => {
+      const lines = data.toString().split('\n');
+      lines.forEach(line => {
+        if (line.trim()) {
+          process.stdout.write(`${color}[${name}]${colors.reset} ${line}\n`);
+        }
+      });
     });
-  });
+  }
 
   activeProcesses.push(proc);
   return proc;
@@ -56,21 +58,25 @@ async function main() {
     const rootDir = path.resolve(__dirname, '..');
     
     const runPhp = () => startProcess('ims', 'php', ['-S', '0.0.0.0:8001'], colors.bgBlue, rootDir);
-    const runNgrok = () => startProcess('tunnel', 'ngrok', ['http', '8001'], colors.magenta, rootDir);
+    const runNgrok = () => startProcess('tunnel', 'ngrok', ['http', '8001'], colors.magenta, rootDir, 'inherit');
 
     switch(choice) {
       case '1':
+        rl.close();
         runPhp();
         break;
       case '2':
+        rl.close();
         runPhp();
         runNgrok();
         break;
       case '3':
+        rl.close();
         process.exit();
         break;
       default:
         console.log(`${colors.red}Invalid choice.${colors.reset}`);
+        rl.close();
         process.exit();
     }
   });
