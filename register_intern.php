@@ -77,15 +77,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     // Call Python ONNX Face Service to get embeddings
-    // Python service is expected to run on localhost:5001
+    // Python service is expected to run on port 5001 (usually on the kiosk backend host)
+    $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http');
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    
+    // Attempt to resolve face service URL dynamically
+    // If running via proxy, the face server is likely on the same host as the IMS
     $pythonServiceUrl = 'http://localhost:5001/embed';
+    
+    if (!in_array(parse_url($pythonServiceUrl, PHP_URL_HOST), ['localhost', '127.0.0.1'])) {
+        // Fallback for non-local setups
+    }
 
     $ch = curl_init($pythonServiceUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['images' => $images]));
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    
+    // HIGH CONCURRENCY: Increase timeout to 60 seconds to allow queuing during peak registration
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -98,7 +110,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     if ($httpCode !== 200) {
-        echo json_encode(['success' => false, 'error' => 'Failed to generate face embedding. Ensure your face is clear.']);
+        $errorMsg = 'Failed to generate face embedding. Ensure your face is clear.';
+        if ($response) {
+            $result = json_decode($response, true);
+            if (!empty($result['error'])) {
+                $errorMsg = $result['error'];
+            }
+        }
+        echo json_encode(['success' => false, 'error' => $errorMsg]);
         exit;
     }
 
@@ -407,9 +426,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
                 <div id="submittingState" class="status-card hidden">
                     <div class="status-icon"><i class="fas fa-spinner fa-spin text-orange"></i></div>
-                    <div class="status-title">Analyzing Face Profiles</div>
-                    <div class="status-text">Analyzing your captured photos and securing your Face ID profile. Please do not
-                        close this window.</div>
+                    <div class="status-title">Processing Biometrics</div>
+                    <div class="status-text">We are analyzing your face profiles and securing your identity. This may take up to 30-60 seconds during peak times. <strong>Please do not close this window or refresh.</strong></div>
                 </div>
             </div>
 
@@ -776,11 +794,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 const sx1 = (vWidth1 - minDim1) / 2;
                 const sy1 = (vHeight1 - minDim1) / 2;
                 
-                ctx.save();
-                ctx.translate(canvas.width, 0);
-                ctx.scale(-1, 1);
                 ctx.drawImage(webcam, sx1, sy1, minDim1, minDim1, 0, 0, canvas.width, canvas.height);
-                ctx.restore();
                 
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
                 const base64Data = dataUrl.split(',')[1];
@@ -797,11 +811,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         const sx2 = (vWidth2 - minDim2) / 2;
                         const sy2 = (vHeight2 - minDim2) / 2;
                         
-                        ctx.save();
-                        ctx.translate(canvas.width, 0);
-                        ctx.scale(-1, 1);
                         ctx.drawImage(webcam, sx2, sy2, minDim2, minDim2, 0, 0, canvas.width, canvas.height);
-                        ctx.restore();
                         
                         const dataUrl2 = canvas.toDataURL('image/jpeg', 0.95);
                         const base64Data2 = dataUrl2.split(',')[1];
