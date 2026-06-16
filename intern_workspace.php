@@ -7,7 +7,6 @@ checkSession();
 $db       = getDB();
 $internId = (int)($_GET['id'] ?? 0);
 
-// ── Load intern early (needed for POST handlers) ──────────────────────────
 $stmt = $db->prepare(
     "SELECT i.*, d.name AS dept_name, d.id AS dept_id
      FROM interns i JOIN departments d ON d.id = i.department_id
@@ -20,14 +19,10 @@ $stmt->close();
 
 if (!$intern) { header('Location: /interns.php'); exit; }
 
-// ════════════════════════════════════════════════════════════════════════════
-// ALL POST HANDLERS — must run BEFORE any HTML output
-// ════════════════════════════════════════════════════════════════════════════
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action  = $_POST['action'] ?? '';
     $backTab = '201';
 
-    // ── Profile: update ──────────────────────────────────────────────────
     if ($action === 'update_profile') {
         $backTab = '201';
 
@@ -51,6 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cs   = trim($_POST['civil_status']    ?? '');
         $gn   = trim($_POST['guardian_name']   ?? '');
         $gc   = trim($_POST['guardian_contact']?? '');
+
+        $deptIdNew = (int)($_POST['department_id'] ?? $intern['department_id']);
 
         if (!$fn || !$ln) {
             $_SESSION['profile_error'] = 'First name and last name are required.';
@@ -81,10 +78,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             if (!isset($_SESSION['profile_error'])) {
-                // 12 strings + 1 double + 8 strings + 1 int = 22 params
+                // 12 strings + 1 double + 8 strings + 2 ints = 23 params
                 $stmt = $db->prepare(
                     "UPDATE interns
-                     SET first_name=?, last_name=?, middle_name=?, email=?, phone=?, address=?,
+                     SET department_id=?,
+                         first_name=?, last_name=?, middle_name=?, email=?, phone=?, address=?,
                          birthdate=?, gender=?, school=?, course=?, year_level=?, school_address=?,
                          required_hours=?,
                          start_date=?, end_date=?, supervisor=?,
@@ -92,9 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                          profile_photo=?
                      WHERE id=?"
                 );
-                // types: s×12, d×1, s×8, i×1 = 22 chars
+                // types: i + s×12 + d + s×8 + i = 23 chars
                 $stmt->bind_param(
-                    'ssssssssssssdssssssssi',
+                    'issssssssssssdssssssssi',
+                    $deptIdNew,
                     $fn, $ln, $mn, $em, $ph, $addr,
                     $bd, $gen, $sch, $crs, $yl, $sa,
                     $rh,
@@ -105,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
                 $stmt->execute();
                 $stmt->close();
-                logAudit('UPDATE', 'Interns', $internId, "Profile updated for {$fn} {$ln}.");
+                logAudit('UPDATE', 'Interns', $internId, "Profile updated for {$fn} {$ln}." . ($deptIdNew != $intern['department_id'] ? " Department changed." : ""));
                 $_SESSION['profile_success'] = 'Profile updated successfully.';
             }
         }

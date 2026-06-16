@@ -52,12 +52,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: /intern_workspace.php?id={$newId}&tab=201&new=1");
         exit;
 
-    } elseif ($action === 'archive_intern') {        $id = (int)($_POST['intern_id'] ?? 0);
+    } elseif ($action === 'archive_intern') {
+        $id = (int)($_POST['intern_id'] ?? 0);
         $stmt = $db->prepare("UPDATE interns SET status='Archived' WHERE id=? AND department_id=?");
         $stmt->bind_param('ii', $id, $deptId);
         $stmt->execute();
         $stmt->close();
         logAudit('ARCHIVE', 'Interns', $id, "Intern #{$id} archived.");
+
+    } elseif ($action === 'unarchive_intern') {
+        $id = (int)($_POST['intern_id'] ?? 0);
+        $stmt = $db->prepare("UPDATE interns SET status='Active' WHERE id=? AND department_id=?");
+        $stmt->bind_param('ii', $id, $deptId);
+        $stmt->execute();
+        $stmt->close();
+        logAudit('RESTORE', 'Interns', $id, "Intern #{$id} restored to active.");
     }
 
     header("Location: /department_view.php?id={$deptId}");
@@ -65,20 +74,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch interns
-$search     = trim($_GET['search'] ?? '');
+$search       = trim($_GET['search'] ?? '');
 $statusFilter = $_GET['status'] ?? 'Active';
-$params     = [$deptId];
-$types      = 'i';
-$where      = "WHERE i.department_id = ?";
+$params       = [$deptId];
+$types        = 'i';
+$where        = "WHERE i.department_id = ?";
 
 if ($statusFilter === 'Archived') {
     $where .= " AND i.status = 'Archived'";
+} elseif ($statusFilter === 'All') {
+    // no status filter
 } else {
     $where .= " AND i.status = 'Active'";
 }
 
 if ($search !== '') {
-    $where  .= " AND CONCAT(i.first_name,' ',i.last_name) LIKE ?";
+    $where   .= " AND CONCAT(i.first_name,' ',i.last_name) LIKE ?";
     $params[] = "%{$search}%";
     $types   .= 's';
 }
@@ -119,8 +130,9 @@ require_once __DIR__ . '/includes/header.php';
                        value="<?= htmlspecialchars($search) ?>" maxlength="100">
             </div>
             <select name="status" class="form-control" style="width:auto">
-                <option value="Active"   <?= $statusFilter==='Active'   ? 'selected':'' ?>>Active</option>
-                <option value="Archived" <?= $statusFilter==='Archived' ? 'selected':'' ?>>Archived</option>
+                <option value="Active"   <?= $statusFilter==='Active'  ?'selected':'' ?>>Active</option>
+                <option value="Archived" <?= $statusFilter==='Archived'?'selected':'' ?>>Inactive / Archived</option>
+                <option value="All"      <?= $statusFilter==='All'     ?'selected':'' ?>>All</option>
             </select>
             <button type="submit" class="btn btn-secondary"><i class="fas fa-filter"></i> Filter</button>
             <a href="/department_view.php?id=<?= $deptId ?>" class="btn btn-secondary">Reset</a>
@@ -133,16 +145,17 @@ require_once __DIR__ . '/includes/header.php';
 <div class="card"><div class="card-body">
     <div class="empty-state">
         <i class="fas fa-users"></i>
-        <p>No <?= strtolower($statusFilter) ?> interns found<?= $search ? " matching \"".htmlspecialchars($search)."\"" : '' ?>.</p>
+        <p>No interns found<?= $search ? ' matching "'.htmlspecialchars($search).'"' : '' ?>.</p>
     </div>
 </div></div>
 <?php else: ?>
 <div class="intern-grid">
     <?php foreach ($interns as $intern):
-        $pct = $intern['required_hours'] > 0
+        $pct      = $intern['required_hours'] > 0
             ? min(100, round(($intern['rendered_hours'] / $intern['required_hours']) * 100))
             : 0;
         $initials = strtoupper(substr($intern['first_name'],0,1) . substr($intern['last_name'],0,1));
+        $isActive = $intern['status'] === 'Active';
     ?>
     <div class="intern-card" onclick="location.href='/intern_workspace.php?id=<?= $intern['id'] ?>'">
         <div class="intern-card-header">
@@ -154,7 +167,7 @@ require_once __DIR__ . '/includes/header.php';
                 <?php endif; ?>
             </div>
             <div>
-                <div class="intern-card-name"><?= htmlspecialchars($intern['first_name'] . ' ' . $intern['last_name']) ?></div>
+                <div class="intern-card-name"><?= htmlspecialchars($intern['first_name'].' '.$intern['last_name']) ?></div>
                 <div class="intern-card-dept"><?= htmlspecialchars($intern['school'] ?: '—') ?></div>
             </div>
             <span class="badge badge-<?= strtolower($intern['status']) ?>" style="margin-left:auto">
@@ -168,17 +181,22 @@ require_once __DIR__ . '/includes/header.php';
             <span><?= number_format($intern['rendered_hours'],1) ?> / <?= number_format($intern['required_hours'],0) ?> hrs</span>
             <span><?= $pct ?>% complete</span>
         </div>
-        <?php if ($intern['status'] === 'Active'): ?>
         <div style="margin-top:10px;display:flex;gap:8px" onclick="event.stopPropagation()">
             <a href="/intern_workspace.php?id=<?= $intern['id'] ?>" class="btn btn-outline btn-sm" style="flex:1;justify-content:center">
                 <i class="fas fa-eye"></i> View
             </a>
-            <button class="btn btn-secondary btn-sm"
+            <?php if ($isActive): ?>
+            <button class="btn btn-secondary btn-sm" title="Archive"
                 onclick="archiveIntern(<?= $intern['id'] ?>, '<?= htmlspecialchars(addslashes($intern['first_name'].' '.$intern['last_name'])) ?>')">
                 <i class="fas fa-archive"></i>
             </button>
+            <?php else: ?>
+            <button class="btn btn-success btn-sm" title="Restore"
+                onclick="unarchiveIntern(<?= $intern['id'] ?>, '<?= htmlspecialchars(addslashes($intern['first_name'].' '.$intern['last_name'])) ?>')">
+                <i class="fas fa-undo"></i>
+            </button>
+            <?php endif; ?>
         </div>
-        <?php endif; ?>
     </div>
     <?php endforeach; ?>
 </div>
@@ -278,11 +296,38 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<!-- Unarchive Confirm Modal -->
+<div class="modal-overlay" id="unarchiveModal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Restore Intern</span>
+            <button class="modal-close" onclick="closeModal('unarchiveModal')"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="action" value="unarchive_intern">
+            <input type="hidden" name="intern_id" id="unarchiveInternId">
+            <div class="modal-body">
+                <p>Restore <strong id="unarchiveInternName"></strong> to Active?</p>
+                <p class="text-muted mt-8" style="font-size:13px">The intern will be moved back to the active list.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('unarchiveModal')">Cancel</button>
+                <button type="submit" class="btn btn-success"><i class="fas fa-undo"></i> Restore</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function archiveIntern(id, name) {
     document.getElementById('archiveInternId').value = id;
     document.getElementById('archiveInternName').textContent = name;
     openModal('archiveModal');
+}
+function unarchiveIntern(id, name) {
+    document.getElementById('unarchiveInternId').value = id;
+    document.getElementById('unarchiveInternName').textContent = name;
+    openModal('unarchiveModal');
 }
 </script>
 

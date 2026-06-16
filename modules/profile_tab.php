@@ -202,6 +202,26 @@ function v(array $arr, string $key): string {
 <div class="card mt-16">
     <div class="card-header"><span class="card-title"><i class="fas fa-briefcase text-orange"></i> Internship Details</span></div>
     <div class="card-body">
+        <?php
+        $allDepts = $db->query("SELECT id, name FROM departments ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
+        ?>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Department</label>
+                <select name="department_id" class="form-control">
+                    <?php foreach ($allDepts as $d): ?>
+                    <option value="<?= $d['id'] ?>" <?= $intern['department_id'] == $d['id'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($d['name']) ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Supervisor</label>
+                <input type="text" name="supervisor" class="form-control" maxlength="100"
+                       value="<?= v($intern,'supervisor') ?>">
+            </div>
+        </div>
         <div class="form-row">
             <div class="form-group">
                 <label class="form-label">Start Date</label>
@@ -219,11 +239,6 @@ function v(array $arr, string $key): string {
                 <label class="form-label">Required Hours</label>
                 <input type="number" name="required_hours" class="form-control" min="1" step="0.5"
                        value="<?= v($intern,'required_hours') ?>">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Supervisor</label>
-                <input type="text" name="supervisor" class="form-control" maxlength="100"
-                       value="<?= v($intern,'supervisor') ?>">
             </div>
         </div>
     </div>
