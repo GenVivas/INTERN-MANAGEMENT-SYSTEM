@@ -1014,14 +1014,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         }
                     }
                 } else if (currentStep === 1) {
-                    if (yaw >= 25 && yaw <= 45 && Math.abs(pitch) <= 12) {
+                    if (yaw >= 12 && yaw <= 25 && Math.abs(pitch) <= 12) {
                         matched = true;
                     } else {
                         if (yaw < 0) {
                             correctionHint = "Turn your head to the right";
-                        } else if (yaw >= 0 && yaw < 25) {
+                        } else if (yaw >= 0 && yaw < 12) {
                             correctionHint = "Turn further to the right";
-                        } else if (yaw > 45) {
+                        } else if (yaw > 25) {
                             correctionHint = "Turn back left slightly";
                         } else if (pitch > 12) {
                             correctionHint = "Look down to level your face";
@@ -1030,14 +1030,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         }
                     }
                 } else if (currentStep === 2) {
-                    if (yaw <= -25 && yaw >= -45 && Math.abs(pitch) <= 12) {
+                    if (yaw <= -12 && yaw >= -25 && Math.abs(pitch) <= 12) {
                         matched = true;
                     } else {
                         if (yaw > 0) {
                             correctionHint = "Turn your head to the left";
-                        } else if (yaw <= 0 && yaw > -25) {
+                        } else if (yaw <= 0 && yaw > -12) {
                             correctionHint = "Turn further to the left";
-                        } else if (yaw < -45) {
+                        } else if (yaw < -25) {
                             correctionHint = "Turn back right slightly";
                         } else if (pitch > 12) {
                             correctionHint = "Look down to level your face";
@@ -1046,14 +1046,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         }
                     }
                 } else if (currentStep === 3) {
-                    if (pitch >= 22 && pitch <= 40 && Math.abs(yaw) <= 12) {
+                    if (pitch >= 10 && pitch <= 22 && Math.abs(yaw) <= 12) {
                         matched = true;
                     } else {
                         if (pitch < 0) {
                             correctionHint = "Tilt your chin up";
-                        } else if (pitch >= 0 && pitch < 22) {
+                        } else if (pitch >= 0 && pitch < 10) {
                             correctionHint = "Tilt further up";
-                        } else if (pitch > 40) {
+                        } else if (pitch > 22) {
                             correctionHint = "Tilt back down slightly";
                         } else if (yaw > 12) {
                             correctionHint = "Look further right to center";
